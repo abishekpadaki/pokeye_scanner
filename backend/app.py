@@ -18,7 +18,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # --- LLM and DB Handlers (to be implemented later) ---
-# import llm_handler
+import llm_handler # Updated: Import the llm_handler
 # import db_handler
 
 # --- JSON structure for Pokémon card (example) ---
@@ -85,29 +85,57 @@ def scan_card():
         
         app.logger.info(f"Image received and saved to {filepath}")
 
-        # --- Placeholder for LLM Processing ---
-        # In a real scenario, you would send `image_bytes` or `filepath` to an LLM service
-        # llm_response = llm_handler.extract_card_info(image_bytes)
-        # For now, return mock data
-        mock_llm_response = {
-            "card_name": "Pikachu (Mock)",
-            "hp": 60,
-            "pokemon_type": ["Lightning"],
-            "attacks": [
-                {"name": "Quick Attack", "cost": ["L"], "damage": "10", "description": "Flip a coin. If heads, this attack does 10 more damage."},
-                {"name": "Thunderbolt", "cost": ["L", "C", "C"], "damage": "50", "description": "Discard all Energy attached to Pikachu."}
-            ],
-            "weakness": {"type": "Fighting", "value": "x2"},
-            "set_name": "Mock Set",
-            "card_number": "25/100",
-            "rarity": "Common"
-        }
-        # Simulate merging with schema to ensure all fields are present
-        processed_data = POKEMON_CARD_SCHEMA.copy()
-        processed_data.update(mock_llm_response)
+        # --- LLM Processing ---
+        llm_response = llm_handler.extract_card_info_gemini(image_bytes)
+
+        if 'error' in llm_response:
+            app.logger.error(f"LLM processing failed: {llm_response['error']}")
+            # Send back the LLM error and potentially the raw response if available
+            error_detail = {"error": f"LLM processing error: {llm_response['error']}"}
+            if "raw_response" in llm_response:
+                error_detail["llm_raw_response"] = llm_response["raw_response"]
+            return jsonify(error_detail), 500
+
+        # Merge LLM response with our schema to ensure all fields are present
+        # and to maintain a consistent structure.
+        processed_data = POKEMON_CARD_SCHEMA.copy() 
+        # We need to be careful here. If the LLM returns a field with a valid value (e.g. hp: 0),
+        # and our schema has hp: None, we want the LLM's value.
+        # However, if the LLM omits a field, we want our schema's default.
+        # A simple update might not be enough if the LLM returns partial sub-objects (e.g. only attack name).
+        # For now, let's do a smart update.
+        
+        for key, schema_default_value in POKEMON_CARD_SCHEMA.items():
+            if key in llm_response and llm_response[key] is not None:
+                # If the key is in LLM response and not None, use LLM's value
+                if isinstance(schema_default_value, dict) and isinstance(llm_response[key], dict):
+                    # For nested dicts (like weakness, resistance), merge them
+                    processed_data[key] = schema_default_value.copy()
+                    processed_data[key].update(llm_response[key])
+                elif isinstance(schema_default_value, list) and isinstance(llm_response[key], list):
+                    # For lists (like attacks, pokemon_type), ensure items are structured if needed
+                    # For attacks, the schema has a list of dicts
+                    if key == "attacks" and llm_response[key]:
+                        updated_attacks = []
+                        attack_schema = POKEMON_CARD_SCHEMA["attacks"][0] if POKEMON_CARD_SCHEMA["attacks"] else {}
+                        for llm_attack in llm_response[key]:
+                            if isinstance(llm_attack, dict):
+                                current_attack = attack_schema.copy()
+                                current_attack.update(llm_attack)
+                                updated_attacks.append(current_attack)
+                            else:
+                                updated_attacks.append(llm_attack) # or handle error
+                        processed_data[key] = updated_attacks
+                    else:
+                        processed_data[key] = llm_response[key]
+                else:
+                    processed_data[key] = llm_response[key]
+            # Else, it keeps the default from POKEMON_CARD_SCHEMA.copy()
+
+        app.logger.info(f"LLM Processed Data: {processed_data}")
 
         # --- Placeholder for Database Storage ---
-        # db_handler.store_card_data(processed_data)
+        # db_handler.store_card_data(processed_data, filename, llm_response)
 
         return jsonify(processed_data)
 
