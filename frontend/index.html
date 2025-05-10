@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pokéye Scanner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pokéye Card Scanner</h1>
+        <div class="camera-container">
+            <video id="cameraFeed" playsinline autoplay></video>
+            <canvas id="photoCanvas" style="display:none;"></canvas>
+        </div>
+        <button id="captureBtn">Scan Card</button>
+        <button id="flipCameraBtn" style="display:none;">Flip Camera</button>
+        
+        <h2>Extracted Information:</h2>
+        <div id="results" class="results-container">
+            <pre id="jsonOutput">Scan a card to see details here.</pre>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,4 @@
+./backend/uploads/*
+./backend/.env
+./backend/venv/*
+./backend/pokemon_cards.db

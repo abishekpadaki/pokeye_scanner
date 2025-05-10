@@ -1,0 +1,110 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px; /* Max width for larger screens */
+}
+
+h1 {
+    color: #e74c3c; /* Pokémon-ish red */
+}
+
+.camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* Control camera feed size */
+    margin: 20px auto;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden; /* Ensures video fits into border */
+}
+
+#cameraFeed {
+    display: block; /* Removes extra space below video */
+    width: 100%;
+    height: auto;
+    transform: scaleX(-1); /* Mirror mode for front camera illusion */
+}
+
+button {
+    background-color: #3498db; /* Pokémon-ish blue */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 10px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button:active {
+    background-color: #1f6a9c;
+}
+
+#captureBtn {
+    background-color: #e67e22; /* Orange capture button */
+}
+
+#captureBtn:hover {
+    background-color: #d35400;
+}
+
+#flipCameraBtn {
+    background-color: #95a5a6;
+}
+
+#flipCameraBtn:hover {
+    background-color: #7f8c8d;
+}
+
+.results-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    text-align: left;
+    word-wrap: break-word; /* Ensure long strings don't break layout */
+}
+
+#jsonOutput {
+    white-space: pre-wrap; /* Allows text to wrap and preserves whitespace */
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9em;
+    color: #2c3e50;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 15px;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+} 
